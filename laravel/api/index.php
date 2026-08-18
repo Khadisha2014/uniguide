@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\ViewServiceProvider;
 
 define('LARAVEL_START', microtime(true));
@@ -117,5 +118,7 @@ try {
 if (! $app->bound('view')) {
     $app->register(ViewServiceProvider::class);
 }
+
+URL::forceScheme('https');
 
 $app->handleRequest(Request::capture());
