@@ -1,8 +1,8 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "framework": null,
-    "installCommand": "composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader",
-    "buildCommand": "php -r \"touch('database/database.sqlite');\" && php artisan migrate:fresh --seed --force",
+    "installCommand": "echo \"PHP dependencies are handled by vercel-php\"",
+    "buildCommand": "echo \"Runtime database is initialized with PDO\"",
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
