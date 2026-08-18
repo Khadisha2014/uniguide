@@ -1,8 +1,8 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "framework": null,
-    "installCommand": "echo \"Frontend dependencies are not required\"",
-    "buildCommand": "echo \"Assets are served directly from public\"",
+    "installCommand": "composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader",
+    "buildCommand": "php -r \"touch('database/database.sqlite');\" && php artisan migrate:fresh --seed --force",
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {

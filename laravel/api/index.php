@@ -2,10 +2,6 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Container\Container;
 
 define('LARAVEL_START', microtime(true));
 
@@ -15,10 +11,12 @@ require __DIR__.'/../vendor/autoload.php';
 // each cold instance and keep runtime sessions out of SQLite.
 $temporaryPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
 $databasePath = $temporaryPath.DIRECTORY_SEPARATOR.'uniguide-database.sqlite';
-$initializeDatabase = ! file_exists($databasePath);
+$bundledDatabasePath = __DIR__.'/../database/database.sqlite';
 
-if ($initializeDatabase) {
-    touch($databasePath);
+if (! file_exists($databasePath)) {
+    if (! file_exists($bundledDatabasePath) || ! copy($bundledDatabasePath, $databasePath)) {
+        throw new RuntimeException('The bundled UniGuide database is unavailable.');
+    }
 }
 
 foreach ([
@@ -48,21 +46,6 @@ foreach ([
     if (! is_dir($directory)) {
         mkdir($directory, 0777, true);
     }
-}
-
-if ($initializeDatabase) {
-    /** @var Application $consoleApp */
-    $consoleApp = require __DIR__.'/../bootstrap/app.php';
-    $consoleApp->useStoragePath($storagePath);
-    $consoleApp->make(Kernel::class)->bootstrap();
-
-    Artisan::call('migrate', ['--force' => true]);
-    Artisan::call('db:seed', ['--force' => true]);
-
-    Facade::clearResolvedInstances();
-    Facade::setFacadeApplication(null);
-    Container::setInstance(null);
-    unset($consoleApp);
 }
 
 /** @var Application $app */
