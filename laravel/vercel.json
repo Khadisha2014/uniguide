@@ -1,7 +1,8 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "framework": null,
-    "buildCommand": "npm run build",
+    "installCommand": "echo \"Frontend dependencies are not required\"",
+    "buildCommand": "echo \"Assets are served directly from public\"",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4"
