@@ -34,12 +34,6 @@ foreach ([
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-if ($initializeDatabase) {
-    $app->make(Kernel::class)->bootstrap();
-    Artisan::call('migrate', ['--force' => true]);
-    Artisan::call('db:seed', ['--force' => true]);
-}
-
 // Vercel functions may only write temporary files to /tmp.
 $storagePath = '/tmp/storage';
 
@@ -57,4 +51,11 @@ foreach ([
 }
 
 $app->useStoragePath($storagePath);
+
+if ($initializeDatabase) {
+    $app->make(Kernel::class)->bootstrap();
+    Artisan::call('migrate', ['--force' => true]);
+    Artisan::call('db:seed', ['--force' => true]);
+}
+
 $app->handleRequest(Request::capture());
