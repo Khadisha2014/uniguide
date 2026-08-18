@@ -2,6 +2,8 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\View\ViewServiceProvider;
 
 define('LARAVEL_START', microtime(true));
 
@@ -99,4 +101,18 @@ foreach ([
 /** @var Application $app */
 $app = require __DIR__.'/../bootstrap/app.php';
 $app->useStoragePath($storagePath);
+
+try {
+    $app->make(Kernel::class)->bootstrap();
+} catch (Throwable $exception) {
+    error_log('UNIGUIDE_BOOTSTRAP_FAILURE '.get_class($exception).': '.$exception->getMessage());
+    http_response_code(500);
+    echo 'Laravel bootstrap failed. Check the Vercel runtime log.';
+    exit;
+}
+
+if (! $app->bound('view')) {
+    $app->register(ViewServiceProvider::class);
+}
+
 $app->handleRequest(Request::capture());
