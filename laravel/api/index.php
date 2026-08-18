@@ -84,8 +84,10 @@ foreach ([
 
 // Vercel functions may only write temporary files to /tmp.
 $storagePath = $temporaryPath.DIRECTORY_SEPARATOR.'uniguide-storage';
+$bootstrapPath = $temporaryPath.DIRECTORY_SEPARATOR.'uniguide-bootstrap';
 
 foreach ([
+    $bootstrapPath.'/cache',
     $storagePath.'/app/private',
     $storagePath.'/app/public',
     $storagePath.'/framework/cache/data',
@@ -100,6 +102,7 @@ foreach ([
 
 /** @var Application $app */
 $app = require __DIR__.'/../bootstrap/app.php';
+$app->useBootstrapPath($bootstrapPath);
 $app->useStoragePath($storagePath);
 
 try {
