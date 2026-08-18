@@ -3,6 +3,7 @@
     "framework": null,
     "installCommand": "echo \"Frontend dependencies are not required\"",
     "buildCommand": "echo \"Assets are served directly from public\"",
+    "outputDirectory": "public",
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4"
