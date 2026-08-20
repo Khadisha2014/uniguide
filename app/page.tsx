@@ -26,20 +26,72 @@ const universities: University[] = [
 const countries=["Все страны",...Array.from(new Set(universities.map(u=>u.country)))];
 
 export default function Home(){
- const [query,setQuery]=useState(""); const [country,setCountry]=useState("Все страны"); const [budget,setBudget]=useState(65); const [saved,setSaved]=useState<number[]>([]); const [compare,setCompare]=useState<number[]>([]); const [showFilters,setShowFilters]=useState(false);
+ const [query,setQuery]=useState(""); 
+ const [country,setCountry]=useState("Все страны"); 
+ const [budget,setBudget]=useState(65); 
+ const [saved,setSaved]=useState<number[]>([]); 
+ const [compare,setCompare]=useState<number[]>([]); 
+ const [showFilters,setShowFilters]=useState(false);
+ const [selectedUni, setSelectedUni] = useState<University | null>(null); // НОВОЕ: для модального окна
+
  const filtered=useMemo(()=>universities.filter(u=>(country==="Все страны"||u.country===country)&&u.tuitionValue<=budget&&`${u.name} ${u.city} ${u.country}`.toLowerCase().includes(query.toLowerCase())),[query,country,budget]);
+ 
  const toggleCompare=(id:number)=>setCompare(old=>old.includes(id)?old.filter(x=>x!==id):old.length<3?[...old,id]:old);
+
+ // НОВОЕ: функция для "Подробнее"
+ const showDetails = (u: University) => setSelectedUni(u);
+
  return <main>
   <header className="nav"><a className="brand" href="#top"><span className="brandmark">U</span>UniGuide</a><nav><a href="#catalog">Университеты</a><a href="#how">Как поступить</a><a href="#guide">Гайды</a></nav><div className="nav-actions"><button className="saved-btn">♡ <span>Избранное</span><b>{saved.length}</b></button><button className="primary small" onClick={()=>document.querySelector("#catalog")?.scrollIntoView({behavior:"smooth"})}>Найти вуз</button></div></header>
+  
   <section className="hero" id="top"><div className="hero-copy"><div className="eyebrow">◌ База из 1 200+ университетов</div><h1>Найди университет,<br/><em>который подходит тебе</em></h1><p>Требования, стоимость, статистика поступления и честное сравнение — всё в одном месте.</p><div className="searchbox"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Университет, город или страна" aria-label="Поиск университета"/><button onClick={()=>document.querySelector("#catalog")?.scrollIntoView({behavior:"smooth"})}>Искать</button></div><div className="quick"><span>Популярное:</span>{["Канада","Германия","Нидерланды"].map(c=><button key={c} onClick={()=>{setCountry(c);document.querySelector("#catalog")?.scrollIntoView({behavior:"smooth"})}}>{c}</button>)}</div></div>
   <div className="hero-visual"><div className="orb orb1"/><div className="orb orb2"/><div className="campus-card"><div className="mini-top"><span>🇳🇱</span><b>University of Amsterdam</b><i>♡</i></div><div className="campus-image"><div className="sun"/><div className="building"><span/><span/><span/><span/><span/></div></div><div className="mini-stats"><span><b>51%</b>поступают</span><span><b>36%</b>иностранцев</span><span><b>#55</b>в мире</span></div></div><div className="float-card fc1"><b>✓</b><span>Шансы поступить<strong>Высокие</strong></span></div><div className="float-card fc2"><b>12</b><span>вузов<br/>в вашем списке</span></div></div></section>
+  
   <section className="trust"><span>Данные собраны из открытых источников и официальных сайтов вузов</span><div><b>1 200+</b> университетов</div><div><b>38</b> стран</div><div><b>2026</b> актуальные данные</div></section>
+  
   <section className="catalog" id="catalog"><div className="section-head"><div><span className="section-kicker">Каталог университетов</span><h2>Сравнивай. Выбирай. Поступай.</h2><p>Настрой фильтры — мы покажем вузы, подходящие под твои цели.</p></div><button className="filter-toggle" onClick={()=>setShowFilters(!showFilters)}>☷ Фильтры</button></div>
   <div className={`filters ${showFilters?"open":""}`}><label>Страна<select value={country} onChange={e=>setCountry(e.target.value)}>{countries.map(c=><option key={c}>{c}</option>)}</select></label><label>Бюджет в год <strong>до ${budget} тыс.</strong><input type="range" min="5" max="65" value={budget} onChange={e=>setBudget(Number(e.target.value))}/></label><label>Направление<select><option>Любое направление</option><option>Бизнес и экономика</option><option>IT и инженерия</option><option>Медицина</option></select></label><label>Уровень<select><option>Бакалавриат</option><option>Магистратура</option><option>PhD</option></select></label></div>
-  <div className="results-line"><b>Найдено: {filtered.length} университетов</b><span>Сортировка: <select><option>По соответствию</option><option>По рейтингу</option><option>По стоимости</option></select></span></div><div className="cards">{filtered.map(u=><article className="uni-card" key={u.id} style={{"--accent":u.accent} as React.CSSProperties}><div className="card-top"><div className="uni-logo">{u.short.slice(0,2)}</div><div><div className="uni-meta">{u.flag} {u.city}, {u.country} · {u.type}</div><h3>{u.name}</h3></div><button className={`heart ${saved.includes(u.id)?"active":""}`} onClick={()=>setSaved(s=>s.includes(u.id)?s.filter(x=>x!==u.id):[...s,u.id])}>{saved.includes(u.id)?"♥":"♡"}</button></div><div className="metrics"><div><span>Мировой рейтинг</span><b>#{u.rank}</b></div><div><span>Средний приём</span><b>{u.acceptance}%</b></div><div><span>Иностранцы</span><b>{u.international}%</b></div><div><span>Стоимость / год</span><b>{u.tuition}</b></div></div><div className="requirements"><span>Требования</span><div>{u.exams.map(e=><em key={e}>{e}</em>)}</div></div><div className="card-foot"><span>◷ Дедлайн: <b>{u.deadline}</b></span><button className={compare.includes(u.id)?"compared":""} onClick={()=>toggleCompare(u.id)}>{compare.includes(u.id)?"✓ В сравнении":"＋ Сравнить"}</button><button className="details">Подробнее →</button></div></article>)}</div>{!filtered.length&&<div className="empty"><b>Ничего не найдено</b><p>Попробуйте увеличить бюджет или выбрать другую страну.</p></div>}</section>
+  <div className="results-line"><b>Найдено: {filtered.length} университетов</b><span>Сортировка: <select><option>По соответствию</option><option>По рейтингу</option><option>По стоимости</option></select></span></div>
+  
+  <div className="cards">{filtered.map(u=>
+    <article className="uni-card" key={u.id} style={{"--accent":u.accent} as React.CSSProperties}>
+      <div className="card-top">
+        <div className="uni-logo">{u.short.slice(0,2)}</div>
+        <div><div className="uni-meta">{u.flag} {u.city}, {u.country} · {u.type}</div><h3>{u.name}</h3></div>
+        <button className={`heart ${saved.includes(u.id)?"active":""}`} onClick={()=>setSaved(s=>s.includes(u.id)?s.filter(x=>x!==u.id):[...s,u.id])}>{saved.includes(u.id)?"♥":"♡"}</button>
+      </div>
+      <div className="metrics"><div><span>Мировой рейтинг</span><b>#{u.rank}</b></div><div><span>Средний приём</span><b>{u.acceptance}%</b></div><div><span>Иностранцы</span><b>{u.international}%</b></div><div><span>Стоимость / год</span><b>{u.tuition}</b></div></div>
+      <div className="requirements"><span>Требования</span><div>{u.exams.map(e=><em key={e}>{e}</em>)}</div></div>
+      <div className="card-foot">
+        <span>◷ Дедлайн: <b>{u.deadline}</b></span>
+        <button className={compare.includes(u.id)?"compared":""} onClick={()=>toggleCompare(u.id)}>{compare.includes(u.id)?"✓ В сравнении":"＋ Сравнить"}</button>
+        <button className="details" onClick={()=>showDetails(u)}>Подробнее →</button> {/* ПОЧИНИЛИ */}
+      </div>
+    </article>
+  )}</div>{!filtered.length&&<div className="empty"><b>Ничего не найдено</b><p>Попробуйте увеличить бюджет или выбрать другую страну.</p></div>}</section>
+  
   <section className="how" id="how"><span className="section-kicker">Путь к поступлению</span><h2>От мечты до оффера — по шагам</h2><div className="steps">{[["01","Определи цель","Страна, специальность и бюджет"],["02","Собери список","Сравни требования и шансы"],["03","Подготовь документы","Экзамены, эссе и рекомендации"],["04","Отправь заявку","Следи за сроками в одном месте"]].map(([n,t,d])=><div key={n}><i>{n}</i><b>{t}</b><span>{d}</span></div>)}</div></section>
+  
   <section className="cta" id="guide"><div><span>Твой следующий шаг</span><h2>Не знаешь, с чего начать?</h2><p>Ответь на 7 вопросов — и получи персональную подборку университетов.</p></div><button className="primary">Подобрать университеты →</button></section>
+  
   <footer><a className="brand" href="#top"><span className="brandmark">U</span>UniGuide</a><p>Твой навигатор в мире высшего образования.</p><span>© 2026 UniGuide · Данные носят справочный характер</span></footer>
-  {compare.length>0&&<div className="compare-bar"><span><b>{compare.length}</b> выбрано для сравнения</span><div>{compare.map(id=><i key={id}>{universities.find(u=>u.id===id)?.short}</i>)}</div><button onClick={()=>setCompare([])}>Очистить</button><button className="primary small">Сравнить →</button></div>}
+  
+  {compare.length>0&&<div className="compare-bar"><span><b>{compare.length}</b> выбрано для сравнения</span><div>{compare.map(id=><i key={id}>{universities.find(u=>u.id===id)?.short}</i>)}</div><button onClick={()=>setCompare([])}>Очистить</button><button className="primary small" onClick={()=>alert("Сравнение: " + compare.map(id=>universities.find(u=>u.id===id)?.name).join(", "))}>Сравнить →</button></div>} {/* ПОЧИНИЛИ */}
+
+  {/* НОВОЕ: Модальное окно для "Подробнее" */}
+  {selectedUni && (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}} onClick={()=>setSelectedUni(null)}>
+      <div style={{background:"white",padding:"30px",borderRadius:"16px",maxWidth:"500px",width:"90%"}} onClick={(e)=>e.stopPropagation()}>
+        <h2>{selectedUni.flag} {selectedUni.name}</h2>
+        <p><b>Город:</b> {selectedUni.city}, {selectedUni.country}</p>
+        <p><b>Рейтинг:</b> #{selectedUni.rank} в мире</p>
+        <p><b>Стоимость:</b> {selectedUni.tuition} в год</p>
+        <p><b>Дедлайн:</b> {selectedUni.deadline}</p>
+        <p><b>Требования:</b> {selectedUni.exams.join(", ")}</p>
+        <button style={{marginTop:"20px",padding:"10px 20px"}} onClick={()=>setSelectedUni(null)}>Закрыть</button>
+      </div>
+    </div>
+  )}
+
  </main>
 }
